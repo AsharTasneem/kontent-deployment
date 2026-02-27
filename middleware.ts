@@ -20,28 +20,6 @@ export function middleware(request: NextRequest) {
   // 2️⃣ Get hostname safely
   const host = request.headers.get('host') ?? '';
 
-  const isVercelDomain = host.endsWith('.vercel.app');
-
-  if (isVercelDomain) {
-    // Vercel deployment domain (no wildcard subdomains)
-    // We expect path-based routing (e.g. project.vercel.app/en/about)
-    const pathnameIsMissingLocale = locales.every(
-      (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-    );
-
-    if (pathnameIsMissingLocale) {
-      // Redirect to default locale path
-      const redirectUrl = new URL(
-        `/${defaultLocale}${pathname === '/' ? '' : pathname}${search}`,
-        request.url
-      );
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // Locale is present in path, let it pass through Next.js App Router naturally
-    return NextResponse.next();
-  }
-
   // ============== SUBDOMAIN ROUTING (Custom Domains & Localhost) ================
   let subdomain = '';
   
