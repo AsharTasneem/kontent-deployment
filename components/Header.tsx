@@ -80,22 +80,10 @@ export default function Header({
   const otherLocaleLabel = locale === "en" ? "عربي" : "EN";
   const currentLocaleLabel = locale === "en" ? "EN" : "عربي";
 
-  // Use the current pathname without any leading locale segment
-  const currentPathname = typeof window !== "undefined"
-    ? window.location.pathname.replace(/^\/(en|ar)(\/|$)/, "/")
-    : "/";
-
-  // By default, assume path-based routing (safest for generic deployments)
-  let currentLocaleUrl = `/${locale}${currentPathname === "/" ? "" : currentPathname}`;
-  let otherLocaleUrl = `/${otherLocale}${currentPathname === "/" ? "" : currentPathname}`;
-
-  // If explicitly navigating via subdomains (e.g., en.domain.com or en.localhost:3000)
-  if (clientHost.match(/^(en|ar)\./)) {
-    const protocol = clientHost.includes("localhost") ? "http" : "https";
-    const baseDomain = clientHost.replace(/^(en|ar)\./, "");
-    currentLocaleUrl = `${protocol}://${locale}.${baseDomain}${currentPathname === "/" ? "" : currentPathname}`;
-    otherLocaleUrl = `${protocol}://${otherLocale}.${baseDomain}${currentPathname === "/" ? "" : currentPathname}`;
-  }
+  const protocol = clientHost.includes("localhost") ? "http" : "https";
+  const baseDomain = clientHost ? clientHost.replace(/^(en|ar)\./, "") : "";
+  const currentLocaleUrl = clientHost ? `${protocol}://${locale}.${baseDomain}` : `/${locale}`;
+  const otherLocaleUrl = clientHost ? `${protocol}://${otherLocale}.${baseDomain}` : `/${otherLocale}`;
 
   return (
     <header className="navbar-glass fixed top-0 left-0 right-0 z-50">
