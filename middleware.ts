@@ -20,14 +20,29 @@ export function middleware(request: NextRequest) {
   // 2️⃣ Get hostname safely
   const host = request.headers.get('host') ?? '';
 
-  /**
-   * HOST EXAMPLES:
-   * en.kontent-ai-demo.vercel.app
-   * ar.kontent-ai-demo.vercel.app
-   * localhost:3000
-   * en.localhost:3000  (after hosts file setup)
-   */
+  const isVercelDomain = host.endsWith('.vercel.app');
 
+  if (isVercelDomain) {
+    // Vercel deployment domain (no wildcard subdomains)
+    // We expect path-based routing (e.g. project.vercel.app/en/about)
+    const pathnameIsMissingLocale = locales.every(
+      (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    );
+
+    if (pathnameIsMissingLocale) {
+      // Redirect to default locale path
+      const redirectUrl = new URL(
+        `/${defaultLocale}${pathname === '/' ? '' : pathname}${search}`,
+        request.url
+      );
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Locale is present in path, let it pass through Next.js App Router naturally
+    return NextResponse.next();
+  }
+
+  // ============== SUBDOMAIN ROUTING (Custom Domains & Localhost) ================
   let subdomain = '';
   
   if (host.includes('localhost')) {
@@ -40,14 +55,14 @@ export function middleware(request: NextRequest) {
     // localhost case
     subdomain = host.split('.')[0].replace(':3000', '');
   } else {
-    // production case
+    // production case (Custom Domain)
     const parts = host.split('.');
     
     // Check if the first part is a known locale ('en' or 'ar')
     if (locales.includes(parts[0])) {
       subdomain = parts[0];
     } else {
-      // It's a root domain like `yourwebsite.com` or `my-project.vercel.app`
+      // It's a root domain like `yourwebsite.com`
       // Force redirect to the default locale's subdomain!
       const protocol = request.headers.get("x-forwarded-proto") || "https";
       const redirectUrl = new URL(`${protocol}://${defaultLocale}.${host}${pathname}${search}`);
@@ -64,6 +79,7 @@ export function middleware(request: NextRequest) {
     if (pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)) {
       // Rewrite to an explicitly non-existent child path (e.g. /en/404)
       // to let Next.js naturally fall through to its default 404 error page.
+      // (Because subdomain users shouldn't access path locale)
       return NextResponse.rewrite(new URL(`/${locale}/404`, request.url));
     }
   }

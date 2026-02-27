@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { HeaderData, NavLink } from "@/kontentClient";
 
 interface HeaderProps {
@@ -68,6 +69,7 @@ export default function Header({
   host = "",
 }: HeaderProps) {
   const [clientHost, setClientHost] = useState(host);
+  const pathname = usePathname() || "";
 
   useEffect(() => {
     // On the client, window.location.host is the ultimate source of truth
@@ -80,18 +82,40 @@ export default function Header({
   const otherLocaleLabel = locale === "en" ? "عربي" : "EN";
   const currentLocaleLabel = locale === "en" ? "EN" : "عربي";
 
-  const protocol = clientHost.includes("localhost") ? "http" : "https";
-  const baseDomain = clientHost ? clientHost.replace(/^(en|ar)\./, "") : "";
-  const currentLocaleUrl = clientHost ? `${protocol}://${locale}.${baseDomain}` : `/${locale}`;
-  const otherLocaleUrl = clientHost ? `${protocol}://${otherLocale}.${baseDomain}` : `/${otherLocale}`;
+  const isVercelDomain = clientHost.endsWith(".vercel.app");
+
+  let cleanPath = pathname;
+  if (pathname === `/${locale}`) {
+    cleanPath = "/";
+  } else if (pathname.startsWith(`/${locale}/`)) {
+    cleanPath = pathname.replace(`/${locale}/`, "/");
+  }
+
+  let currentLocaleUrl = "";
+  let otherLocaleUrl = "";
+  let logoHref = "";
+
+  if (isVercelDomain) {
+    currentLocaleUrl = pathname;
+    const pathSuffix = cleanPath === "/" ? "" : cleanPath;
+    otherLocaleUrl = `/${otherLocale}${pathSuffix}`;
+    logoHref = `/${locale}`;
+  } else {
+    const protocol = clientHost.includes("localhost") ? "http" : "https";
+    const baseDomain = clientHost ? clientHost.replace(/^(en|ar)\./, "") : "";
+    
+    currentLocaleUrl = clientHost ? `${protocol}://${locale}.${baseDomain}${cleanPath}` : `/${locale}${cleanPath}`;
+    otherLocaleUrl = clientHost ? `${protocol}://${otherLocale}.${baseDomain}${cleanPath}` : `/${otherLocale}${cleanPath}`;
+    logoHref = "/";
+  }
 
   return (
     <header className="navbar-glass fixed top-0 left-0 right-0 z-50">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
         {/* Logo + Language Switcher */}
         <div className="flex items-center gap-8">
-          <Link
-            href={`/${locale}`}
+          <a
+            href={logoHref}
             className="group flex items-center gap-3 transition-colors"
           >
             {/* Logo from CMS */}
@@ -116,7 +140,7 @@ export default function Header({
             <span className="text-base font-semibold tracking-wide text-white/90 transition-colors group-hover:text-white">
               {header?.logoText || fallbackTitle}
             </span>
-          </Link>
+          </a>
 
           {/* Language Switcher */}
           <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium">
