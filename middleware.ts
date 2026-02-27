@@ -5,8 +5,7 @@ const locales = ['en', 'ar'];
 const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
-  const { nextUrl } = request;
-  const { pathname, search } = nextUrl;
+  const { pathname } = request.nextUrl;
 
   // 1️⃣ Skip internal, static, API routes
   if (
@@ -17,58 +16,29 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2️⃣ Get hostname safely (Check x-forwarded-host first, Vercel/proxies use this)
-  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  // 2️⃣ Check if the pathname already has a supported locale
+  // Example: /en/about or /ar
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  );
 
-  /**
-   * HOST EXAMPLES:
-   * en.kontent-ai-demo.vercel.app
-   * ar.kontent-ai-demo.vercel.app
-   * localhost:3000
-   * en.localhost:3000  (after hosts file setup)
-   */
-
-  let subdomain = '';
-  
-  if (host.includes('localhost')) {
-    // If it's explicitly 'localhost:3000' with no subdomain, redirect to en.localhost:3000
-    if (host === 'localhost:3000' || host === 'localhost') {
-      const redirectUrl = new URL(`http://en.${host}${pathname}${search}`);
-      return NextResponse.redirect(redirectUrl);
-    }
-    
-    // localhost case
-    subdomain = host.split('.')[0].replace(':3000', '');
-  } else {
-    // production case
-    subdomain = host.split('.')[0];
-  }
-
-  const locale = locales.includes(subdomain) ? subdomain : defaultLocale;
-
-  // 3️⃣ Remove existing locale from path (if present)
-  let cleanPath = pathname;
-
-  for (const loc of locales) {
-    if (pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)) {
-      // Rewrite to an explicitly non-existent child path (e.g. /en/404)
-      // to let Next.js naturally fall through to its default 404 error page.
-      return NextResponse.rewrite(new URL(`/${locale}/404`, request.url));
-    }
-  }
-
-  // 4️⃣ Prevent infinite rewrite
-  if (pathname.startsWith(`/${locale}`)) {
+  if (pathnameHasLocale) {
     return NextResponse.next();
   }
 
-  // 5️⃣ Rewrite to internal locale path
-  const rewriteUrl = new URL(
-    `/${locale}${cleanPath === '/' ? '' : cleanPath}${search}`,
-    request.url
-  );
+  // 3️⃣ Check for locale subdomains (e.g., en.localhost:3000 or ar.domain.com)
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const subdomainMatch = host.match(/^(en|ar)\./);
 
-  return NextResponse.rewrite(rewriteUrl);
+  if (subdomainMatch) {
+    const locale = subdomainMatch[1];
+    // Rewrite silently, keeping the subdomain in the URL but serving the locale path
+    return NextResponse.rewrite(new URL(`/${locale}${pathname}`, request.url));
+  }
+
+  // 4️⃣ If neither path nor subdomain has a locale, redirect to the default locale in path
+  // E.g. mysite.com/about -> mysite.com/en/about
+  return NextResponse.redirect(new URL(`/${defaultLocale}${pathname}`, request.url));
 }
 
 export const config = {
