@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { HeaderData, NavLink } from "@/kontentClient";
@@ -66,14 +67,23 @@ export default function Header({
   fallbackTitle = "MASAR",
   host = "",
 }: HeaderProps) {
+  const [clientHost, setClientHost] = useState(host);
+
+  useEffect(() => {
+    // On the client, window.location.host is the ultimate source of truth
+    if (typeof window !== "undefined") {
+      setClientHost(window.location.host);
+    }
+  }, []);
+
   const otherLocale = locale === "en" ? "ar" : "en";
   const otherLocaleLabel = locale === "en" ? "عربي" : "EN";
   const currentLocaleLabel = locale === "en" ? "EN" : "عربي";
 
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const baseDomain = host.replace(/^(en|ar)\./, "");
-  const currentLocaleUrl = host ? `${protocol}://${locale}.${baseDomain}` : `/${locale}`;
-  const otherLocaleUrl = host ? `${protocol}://${otherLocale}.${baseDomain}` : `/${otherLocale}`;
+  const protocol = clientHost.includes("localhost") ? "http" : "https";
+  const baseDomain = clientHost ? clientHost.replace(/^(en|ar)\./, "") : "";
+  const currentLocaleUrl = clientHost ? `${protocol}://${locale}.${baseDomain}` : `/${locale}`;
+  const otherLocaleUrl = clientHost ? `${protocol}://${otherLocale}.${baseDomain}` : `/${otherLocale}`;
 
   return (
     <header className="navbar-glass fixed top-0 left-0 right-0 z-50">

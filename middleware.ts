@@ -17,8 +17,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2️⃣ Get hostname safely
-  const host = request.headers.get('host') ?? '';
+  // 2️⃣ Get hostname safely (Check x-forwarded-host first, Vercel/proxies use this)
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
 
   /**
    * HOST EXAMPLES:
