@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/* ── Premium Design Tokens ───────────────────────────────── */
+:root {
+  --background: #fafaf8;
+  --foreground: #1a1a1a;
+
+  /* Golden accent palette */
+  --gold-50: #fdf8ef;
+  --gold-100: #f9efd8;
+  --gold-200: #f2ddb0;
+  --gold-300: #e9c67d;
+  --gold-400: #dfa94e;
+  --gold-500: #d4912f;
+  --gold-600: #bc7724;
+  --gold-700: #9c5b20;
+  --gold-800: #804a21;
+  --gold-900: #6a3e1e;
+
+  /* Neutral warm palette */
+  --stone-50: #fafaf8;
+  --stone-100: #f5f4f0;
+  --stone-200: #e8e6e0;
+  --stone-300: #d5d2c9;
+  --stone-400: #b0aca0;
+  --stone-500: #8a857a;
+  --stone-600: #6b665c;
+  --stone-700: #514d46;
+  --stone-800: #363430;
+  --stone-900: #1c1b19;
+
+  /* Font stacks */
+  --font-body: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Custom Selection ──────────────────────────────────── */
+::selection {
+  background: var(--gold-200);
+  color: var(--stone-900);
+}
+
+/* ── Navbar ─────────────────────────────────────────────── */
+.navbar-glass {
+  background: rgba(15, 15, 12, 0.72);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+.nav-link {
+  position: relative;
+  letter-spacing: 0.08em;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--gold-400), var(--gold-300));
+  transition: width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ── Hero ──────────────────────────────────────────────── */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-animate-1 {
+  animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+.hero-animate-2 {
+  animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+
+.hero-animate-3 {
+  animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
+}
+
+.hero-animate-4 {
+  animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
+}
+
+/* Scroll indicator bounce */
+@keyframes scrollBounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+}
+
+.scroll-indicator {
+  animation: scrollBounce 2.4s ease-in-out infinite;
+}
+
+/* ── Section Fade-in ─────────────────────────────────── */
+.section-fade-in {
+  animation: sectionReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes sectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── About Section ──────────────────────────────────── */
+.section-about {
+  position: relative;
+  background: linear-gradient(180deg, var(--stone-50) 0%, var(--stone-100) 100%);
+}
+
+/* ── Stat Card ──────────────────────────────────────── */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.08),
+    0 8px 16px -8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-400), var(--gold-300), var(--gold-400));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ── Banner / CTA Section ───────────────────────────── */
+.section-banner {
+  position: relative;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Image Decorative Frame ─────────────────────────── */
+.image-frame {
+  position: relative;
+}
+
+.image-frame::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: 12px;
+  bottom: 12px;
+  border: 2px solid var(--gold-300);
+  border-radius: 1rem;
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+.image-frame:hover::before {
+  opacity: 0.8;
+}
+
+/* ── Gold Accent Gradient (reusable) ────────────────── */
+.gold-gradient-text {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400), var(--gold-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Grain Texture Overlay ──────────────────────────── */
+.grain-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Button Shimmer ─────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.btn-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ── Gold Divider ───────────────────────────────────── */
+.gold-divider {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-300),
+    var(--gold-400),
+    var(--gold-300),
+    transparent
+  );
+}
