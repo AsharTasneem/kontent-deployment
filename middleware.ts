@@ -41,10 +41,9 @@ export function middleware(request: NextRequest) {
       subdomain = parts[0];
     } else {
       // It's a root domain like `yourwebsite.com`
-      // Force redirect to the default locale's subdomain!
-      const protocol = request.headers.get("x-forwarded-proto") || "https";
-      const redirectUrl = new URL(`${protocol}://${defaultLocale}.${host}${pathname}${search}`);
-      return NextResponse.redirect(redirectUrl);
+      // We do not want to force a redirect to the default locale's subdomain.
+      // Simply default it to empty so it gets assigned `defaultLocale` below.
+      subdomain = '';
     }
   }
 
